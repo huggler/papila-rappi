@@ -8,6 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@material-ui/core": "^4.12.1",
+    "@material-ui/icons": "^4.11.2",
+    "firebase": "^8.7.1",
     "next": "10.x",
     "react": "17.x",
     "react-dom": "17.x"
