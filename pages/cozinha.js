@@ -51,19 +51,17 @@ export default function Home() {
     setOpen(false);
   };  
 
-
   const [data, setData] = useState([])
 
-  useEffect(() => {
+    useEffect(() => {
 
-    var fb = firebase.database().ref('cadastro');
-    fb.on("value", function(data){
-      var _data = data.val();
-      console.log(_data);
-      setData(Object.values(_data).reverse());
+      var fb = firebase.database().ref('cadastro');
+      fb.on("value", function(data){
+        var _data = data.val();
+        console.log(_data);
+        setData(Object.values(_data).reverse());
     });
-
-  }, [])
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -93,9 +91,6 @@ export default function Home() {
         </List>
       </Dialog>
 
-
-
-
       <Head>
         <title>Papila Rappi</title>
         <link rel="icon" href="/favicon.ico" />
@@ -104,73 +99,32 @@ export default function Home() {
       <header className={styles.header}>
         <img src="/logo-rappi.jpg" className={styles.logotipo} />
       </header>
+      
       <main className={styles.main}>
 
+        <div className={styles.wrapperPedidos}>
+          <div className={styles.timeCocking}>
+            <p>8:00</p>
+          </div>
 
-      <input placeholder="numero do pedido" /> 
+          <div className={styles.pedidosContainer}>
+            <div className={styles.pedidos}>
+              {
+                data.map((item, index) => {
+                  return (<div key={index} className={styles.pedido}>
+                    <p className={styles.orderId}><strong>{item.order_detail.order_id.toString().slice(-4)}</strong></p>
+                  </div>)
+                })
+              }
+            </div>
+          </div>
+        </div>
 
 
-
-      <table className={styles.table}>
-        <thead className={styles.table}>
-          <tr>
-            <th>
-              Data
-            </th>
-            <th>
-              Pedido Quando Chegou
-            </th>
-            <th>
-              Pedido Cozinha repassou
-            </th>
-            <th>
-              Pedido Atendimento pronto
-            </th>
-            <th>
-              Media de tudo
-            </th>
-            <th>
-              Nome Cliente
-            </th>
-            <th>
-              Telefone
-            </th>
-            <th>
-              E-mail
-            </th>
-            <th>
-            </th>
-            <th>
-            </th>
-            <th>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-      {
-        data.map((item, index) => {
-          return (<tr key={index}>
-            <td>{item.order_detail.created_at}</td>
-            <td>{item.order_detail.order_id} - <strong>{item.order_detail.order_id.toString().slice(-4)}</strong></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>{item.order_detail.billing_information.name}</td>
-            <td><a href={`tel:${item.order_detail.billing_information.phone}`} target="_blank">{item.order_detail.billing_information.phone}</a></td>
-            <td><a href={`mailto:${item.order_detail.billing_information.email}`} target="_blank">{item.order_detail.billing_information.email}</a></td>
-            <td><button onClick={() => handleClickOpen(item)}>cozinha</button></td>
-            <td><button onClick={() => handleClickOpen(item)}>detalhes</button></td>
-            <td><button>avisar motoboy que esta pronto</button></td>
-
-          </tr>)
-        })
-      }
-      </tbody>
-      </table>
       </main>
 
       <footer className={styles.footer}>
-      feito com ❤ por PAPILA DELI
+        feito com ❤ por PAPILA DELI
       </footer>
     </div>
   )

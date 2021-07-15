@@ -64,11 +64,56 @@
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 }
 
-
 .footer {
   width: 100%;
   border-top: 1px solid #eaeaea;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+
+
+.wrapperPedidos {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.timeCocking {
+  border-top:  1px solid #a70606;
+  border-bottom:  2px solid #000;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 16px 0;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timeCockingText {
+  font-size: 20vh;
+}
+
+.pedidosContainer {
+  overflow: auto;
+  flex: 2;
+}
+
+.pedidos {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  flex-wrap: wrap;
+}
+
+.pedido {
+  border: 2px solid #000;
+  padding: 8px 16px;
+}
+
+.orderId {
+  font-size: 24px;
 }
