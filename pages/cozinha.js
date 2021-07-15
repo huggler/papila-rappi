@@ -104,7 +104,7 @@ export default function Home() {
 
         <div className={styles.wrapperPedidos}>
           <div className={styles.timeCocking}>
-            <p>8:00</p>
+            <p className={styles.timeCockingText}>8:00</p>
           </div>
 
           <div className={styles.pedidosContainer}>
