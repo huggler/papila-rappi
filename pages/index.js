@@ -150,14 +150,14 @@ export default function Home() {
       {
         data.map((item, index) => {
           return (<tr key={index}>
-            <td>{item.order_detail.created_at}</td>
-            <td>{item.order_detail.order_id} - <strong>{item.order_detail.order_id.toString().slice(-4)}</strong></td>
+            <td>{item.created_at}</td>
+            <td>{item.sequential} - <strong>{item.sequential.toString().slice(-4)}</strong></td>
             <td></td>
             <td></td>
             <td></td>
-            <td>{item.order_detail.billing_information.name}</td>
-            <td><a href={`tel:${item.order_detail.billing_information.phone}`} target="_blank">{item.order_detail.billing_information.phone}</a></td>
-            <td><a href={`mailto:${item.order_detail.billing_information.email}`} target="_blank">{item.order_detail.billing_information.email}</a></td>
+            <td>{item.user.name}</td>
+            <td><a href={`tel:${item.user.phone}`} target="_blank">{item.user.phone}</a></td>
+            <td><a href={`mailto:${item.user.email}`} target="_blank">{item.user.email}</a></td>
             <td><button onClick={() => handleClickOpen(item)}>cozinha</button></td>
             <td><button onClick={() => handleClickOpen(item)}>detalhes</button></td>
             <td><button>avisar motoboy que esta pronto</button></td>
