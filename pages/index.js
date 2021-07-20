@@ -4,10 +4,9 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 
 import {firebase} from '../services/firebase';
-
+import { format, formatDistance, formatRelative, formatDistanceStrict, differenceInMinutes, subDays } from 'date-fns';
 
 import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItem from '@material-ui/core/ListItem';
@@ -15,10 +14,19 @@ import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
+
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
+import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
+
+import CloseIcon from '@material-ui/icons/Close';
+import EditIcon from '@material-ui/icons/Edit';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -51,19 +59,64 @@ export default function Home() {
     setOpen(false);
   };  
 
+  function msToTime(duration) {
+    var milliseconds = parseInt((duration % 1000) / 100),
+      seconds = Math.floor((duration / 1000) % 60),
+      minutes = Math.floor((duration / (1000 * 60)) % 60),
+      hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
 
-  const [data, setData] = useState([])
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return minutes + ":" + seconds;
+  }
+
+  const [data, setData] = useState([]);
 
   useEffect(() => {
 
     var fb = firebase.database().ref('cadastro');
-    fb.on("value", function(data){
-      var _data = data.val();
-      console.log(_data);
-      setData(Object.values(_data).reverse());
-    });
+    fb.on("value", function(snapshot){
 
+      var list = [];
+      var obj = {};
+
+      snapshot.forEach((childSnapshot) => {
+        obj = childSnapshot.val();
+        obj.key = childSnapshot.key;
+        list.push(obj);
+      });
+
+      // var _data = snapshot.val();
+      console.log(list);
+
+      setData(Object.values(list).reverse());
+    });
   }, [])
+
+
+  const handleChangeRemoverPedido = (item) => {
+    console.log(item);
+    var fb = firebase.database().ref('cadastro/' + item.key).remove();
+  }
+
+  const handleChangeCozinhaPronto = (item) => {
+    console.log(item);
+    var fb = firebase.database().ref('cadastro/' + item.key).set({
+      ...item,
+      cozinhaPronto: new Date().getTime()
+    });
+  }
+
+  const handleChangeMotoBoyPronto = (item) => {
+    console.log(item);
+    var fb = firebase.database().ref('cadastro/' + item.key).set({
+      ...item,
+      pedidoPronto: new Date().getTime()
+    });
+  }
+
 
   return (
     <div className={styles.container}>
@@ -72,29 +125,51 @@ export default function Home() {
         <AppBar className={classes.appBar}>
           <Toolbar>
             <Typography variant="h6" className={classes.title}>
-              {detail?.order_detail?.order_id?.toString()?.slice(-4)}
+              {detail?.sequential?.toString()?.slice(-4)} - {detail?.user?.name}
             </Typography>
             <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
               <CloseIcon />
             </IconButton>
           </Toolbar>
         </AppBar>
-        <List>
-          {detail?.order_detail?.items?.map((item, index) => {
-            return (
-            <React.Fragment key={index}>
-            <ListItem button>
-              <ListItemText primary={item.name} secondary={item.quantity} />
-            </ListItem>
-            <Divider />
-            </React.Fragment>
-          )})}
 
-        </List>
+        {
+          detail?.products?.map((item, index) => {
+            return (<Accordion key={index}>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel1a-content"
+                  id="panel1a-header"
+                >
+                  {item.name} - {item.quantity} - {item.total}
+                </AccordionSummary>
+                <AccordionDetails>
+                  <div>
+                  {
+                    item?.modifiers?.map((item, index) => {
+                      return (<p key={item.id}>{item.name} - {item.quantity} - {item.price.actualPrice}</p>)
+                    })
+                  }
+                  </div>
+                </AccordionDetails>
+              </Accordion>
+            )
+          })
+        }
+
+
+        <fieldset>
+          <legend>Entrega</legend>
+          <div>
+            <p>{detail?.address?.address}, {detail?.address?.number}, {detail?.address?.complement} - {detail?.address?.district}</p>
+            <p>{detail?.address?.city}, {detail?.address?.state} - {detail?.address?.zip}</p>
+          </div>
+        </fieldset>
+
+
+        <iframe height="100%" src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBllHqjRcICnCi4czZ-h5yLxNrwObT48cI&q=${detail?.address?.address},{detail?.address?.number}&center=${detail?.address?.latlng?.lat},${detail?.address?.latlng?.lng}`} />
+
       </Dialog>
-
-
-
 
       <Head>
         <title>Papila Rappi</title>
@@ -102,12 +177,11 @@ export default function Home() {
       </Head>
 
       <header className={styles.header}>
-        <img src="/logo-rappi.jpg" className={styles.logotipo} />
+        <strong>MONITOR DE PEDIDOS</strong>
       </header>
       <main className={styles.main}>
 
 
-      <input placeholder="numero do pedido" /> 
 
 
 
@@ -115,18 +189,19 @@ export default function Home() {
         <thead className={styles.table}>
           <tr>
             <th>
-              Data
+              Pedido
             </th>
             <th>
-              Pedido Quando Chegou
+              Entrada
             </th>
-            <th>
+            <th hidden>
               Pedido Cozinha repassou
             </th>
+            <th hidden>Demorou</th>
             <th>
-              Pedido Atendimento pronto
+              Pronto
             </th>
-            <th>
+            <th hidden>
               Media de tudo
             </th>
             <th>
@@ -138,9 +213,9 @@ export default function Home() {
             <th>
               E-mail
             </th>
-            <th>
+            <th hidden>
             </th>
-            <th>
+            <th hidden>
             </th>
             <th>
             </th>
@@ -150,17 +225,18 @@ export default function Home() {
       {
         data.map((item, index) => {
           return (<tr key={index}>
-            <td>{item.created_at}</td>
-            <td>{item.sequential} - <strong>{item.sequential.toString().slice(-4)}</strong></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td>{index+1} - <strong>{item.sequential.toString().slice(-4)}</strong></td>
+            <td>{format(new Date(item.date), 'dd/MM/yyyy HH:mm:ss')}</td>
+            <td hidden>{item.cozinhaPronto && (format(item.cozinhaPronto, 'dd/MM/yyyy HH:mm:ss'))}</td>
+            <td hidden>{item.cozinhaPronto && (msToTime(new Date(item.cozinhaPronto) - new Date(item.date).getTime()))}</td>
+            <td><strong>{item.pedidoPronto && (msToTime(new Date(item.pedidoPronto) - new Date(item.date).getTime()))}</strong></td>
+            <td hidden></td>
             <td>{item.user.name}</td>
             <td><a href={`tel:${item.user.phone}`} target="_blank">{item.user.phone}</a></td>
             <td><a href={`mailto:${item.user.email}`} target="_blank">{item.user.email}</a></td>
-            <td><button onClick={() => handleClickOpen(item)}>cozinha</button></td>
-            <td><button onClick={() => handleClickOpen(item)}>detalhes</button></td>
-            <td><button>avisar motoboy que esta pronto</button></td>
+            <td hidden><button type="button" onClick={() => handleChangeCozinhaPronto(item)}>cozinha avisando atendimento que está pronto</button></td>
+            <td hidden><button type="button" onClick={() => handleChangeMotoBoyPronto(item)}>atendimento avisando motoboy que esta pronto</button></td>
+            <td><IconButton type="button" onClick={() => handleClickOpen(item)}><EditIcon /></IconButton></td>
 
           </tr>)
         })

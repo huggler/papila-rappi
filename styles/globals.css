@@ -15,3 +15,7 @@ body, #__next {
 p {
   margin: 0;
 }
+
+.alerta {
+  background: red;
+}
